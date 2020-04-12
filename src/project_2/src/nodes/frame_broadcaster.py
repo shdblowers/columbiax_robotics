@@ -44,13 +44,17 @@ if __name__ == '__main__':
 
     # camera
     camera_transl_matrix = transformations.translation_matrix([0.0, 0.1, 0.1])
+    # run `rosrun tf tf_echo /camera /object` to confirm result
+    camera_rot_matrix = transformations.euler_matrix(-0.681, -0.778, 1.501)
+    camera_transf_matrix = transformations.concatenate_matrices(camera_transl_matrix, camera_rot_matrix)
 
     while not rospy.is_shutdown():
         base_msg = msg_from_matrix(transformations.identity_matrix(), child_frame_id="base")
         object_msg = msg_from_matrix(object_transf_matrix, child_frame_id="object", parent_frame_id="base")
         robot_msg = msg_from_matrix(robot_transf_matrix, child_frame_id="robot", parent_frame_id="base")
+        camera_msg = msg_from_matrix(camera_transf_matrix, child_frame_id="camera", parent_frame_id="robot")
 
-        combi_message = tf2_msgs.msg.TFMessage([base_msg, object_msg, robot_msg])
+        combi_message = tf2_msgs.msg.TFMessage([base_msg, object_msg, robot_msg, camera_msg])
         pub.publish(combi_message)
 
         rate.sleep()
